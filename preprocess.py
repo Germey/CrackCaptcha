@@ -5,7 +5,7 @@ from captcha.image import ImageCaptcha
 import numpy as np
 import random
 from os import makedirs
-from .config import *
+from config import *
 
 
 def generate_captcha(captcha_text):
@@ -75,8 +75,8 @@ def generate_data():
     if not exists(DATA_PATH):
         makedirs(DATA_PATH)
     with open(join(DATA_PATH, 'data.pkl'), 'wb') as f:
-        pickle.dump(data_x, f)
-        pickle.dump(data_y, f)
+        pickle.dump(np.asarray(data_x, np.float32), f)
+        pickle.dump(np.asarray(data_y, np.float32), f)
 
 
 if __name__ == '__main__':
