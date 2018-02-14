@@ -102,9 +102,12 @@ def main():
     b_conv1 = bias([32])
     # h_conv1.shape: [-1, 60, 160, 32]
     h_conv1 = tf.nn.relu(conv2d(x, w_conv1) + b_conv1)
+    print('H Conv1', h_conv1)
     # h_pool1.shape: [-1, 30, 80, 32]
     h_pool1 = max_pool(h_conv1)
+    print('H Pool1', h_pool1)
     h_drop1 = tf.nn.dropout(h_pool1, keep_prob)
+    print('H Drop1', h_drop1)
     
     # layer2
     w_conv2 = weight([3, 3, 32, 64])
@@ -114,7 +117,7 @@ def main():
     # h_pool2.shape: [-1, 15, 40, 64]
     h_pool2 = max_pool(h_conv2)
     h_drop2 = tf.nn.dropout(h_pool2, keep_prob)
-    
+    print('H Drop2', h_drop2)
     # layer3
     w_conv3 = weight([3, 3, 64, 64])
     b_conv3 = bias([64])
@@ -123,6 +126,7 @@ def main():
     # h_pool3.shape: [-1, 8, 20, 64]
     h_pool3 = max_pool(h_conv3)
     h_drop3 = tf.nn.dropout(h_pool3, keep_prob)
+    print('H Drop3', h_drop3)
     
     h_reshape = tf.reshape(h_drop3, [-1, 8 * 20 * 64])
     # fully connected layer1
@@ -132,6 +136,8 @@ def main():
     h_f1 = tf.nn.relu(tf.matmul(h_reshape, w_f1) + b_f1)
     h_d1 = tf.nn.dropout(h_f1, keep_prob)
     
+    print('H D1', h_d1)
+    
     # fully connected layer2
     w_f2 = weight([1024, CAPTCHA_LENGTH * VOCAB_LENGTH])
     b_f2 = bias([CAPTCHA_LENGTH * VOCAB_LENGTH])
@@ -139,13 +145,20 @@ def main():
     h_f2 = tf.nn.relu(tf.matmul(h_d1, w_f2) + b_f2)
     h_d2 = tf.nn.dropout(h_f2, keep_prob)
     
+    print('H D2', h_d2)
+    print('H D2', tf.shape(h_d2)[0], tf.shape(h_d2)[1])
+    print('H D2', h_d2.get_shape())
+    
     # loss
-    cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=h_d2, labels=y_label))
-    predict = tf.reshape(h_d2, [-1, CAPTCHA_LENGTH, VOCAB_LENGTH])
-    max_idx_p = tf.argmax(predict, axis=2)
-    max_idx_l = tf.argmax(tf.reshape(y_label, [-1, CAPTCHA_LENGTH, VOCAB_LENGTH]), axis=2)
-    correct_predict = tf.equal(max_idx_p, max_idx_l)
-    accuracy = tf.reduce_mean(tf.cast(correct_predict, tf.float32))
+    cross_entropy = tf.reduce_sum(tf.nn.softmax_cross_entropy_with_logits(logits=h_d2, labels=y_label))
+    max_index_predict = tf.argmax(tf.reshape(h_d2, [-1, CAPTCHA_LENGTH, VOCAB_LENGTH]), axis=2)
+    print('Max Index Predict', max_index_predict)
+    max_index_label = tf.argmax(tf.reshape(y_label, [-1, CAPTCHA_LENGTH, VOCAB_LENGTH]), axis=2)
+    print('Max Index Label', max_index_label)
+
+    correct_predict = tf.equal(max_index_predict, max_index_label)
+    print('Correct predict', correct_predict)
+    accuracy = tf.reduce_mean(tf.reshape(tf.cast(correct_predict, tf.float32), [-1]))
     
     # Train
     train = tf.train.AdamOptimizer(FLAGS.learning_rate).minimize(cross_entropy, global_step=global_step)
@@ -206,7 +219,7 @@ if __name__ == '__main__':
     parser.add_argument('--time_step', help='time steps', default=32, type=int)
     parser.add_argument('--embedding_size', help='time steps', default=64, type=int)
     parser.add_argument('--category_num', help='category num', default=5, type=int)
-    parser.add_argument('--learning_rate', help='learning rate', default=0.01, type=float)
+    parser.add_argument('--learning_rate', help='learning rate', default=0.001, type=float)
     parser.add_argument('--epoch_num', help='num of epoch', default=1000, type=int)
     parser.add_argument('--epochs_per_test', help='epochs per test', default=100, type=int)
     parser.add_argument('--epochs_per_dev', help='epochs per dev', default=2, type=int)
