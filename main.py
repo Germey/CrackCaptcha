@@ -220,7 +220,7 @@ if __name__ == '__main__':
     parser.add_argument('--embedding_size', help='time steps', default=64, type=int)
     parser.add_argument('--category_num', help='category num', default=5, type=int)
     parser.add_argument('--learning_rate', help='learning rate', default=0.001, type=float)
-    parser.add_argument('--epoch_num', help='num of epoch', default=1000, type=int)
+    parser.add_argument('--epoch_num', help='num of epoch', default=10000, type=int)
     parser.add_argument('--epochs_per_test', help='epochs per test', default=100, type=int)
     parser.add_argument('--epochs_per_dev', help='epochs per dev', default=2, type=int)
     parser.add_argument('--epochs_per_save', help='epochs per save', default=2, type=int)
