@@ -149,7 +149,7 @@ def main():
     y_label_reshape = tf.reshape(y_label, [-1, VOCAB_LENGTH])
     
     # loss
-    cross_entropy = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=h_f2_reshape, labels=y_label_reshape))
+    cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=h_f2_reshape, labels=y_label_reshape))
     
     max_index_predict = tf.argmax(h_f2_reshape, axis=-1)
     print('Max Index Predict', max_index_predict)
