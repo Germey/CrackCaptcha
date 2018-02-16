@@ -11,6 +11,10 @@ from sklearn.model_selection import train_test_split
 FLAGS = None
 
 
+def standardize(x):
+    return (x - x.mean()) / x.std()
+
+
 def load_data():
     """
     load data from pickle
@@ -19,7 +23,7 @@ def load_data():
     with open(join(FLAGS.source_data), 'rb') as f:
         data_x = pickle.load(f)
         data_y = pickle.load(f)
-        return data_x, data_y
+        return standardize(data_x), data_y
 
 
 def get_data(data_x, data_y):
