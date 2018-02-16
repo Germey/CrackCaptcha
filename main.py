@@ -147,9 +147,9 @@ def main():
     b_f2 = bias([CAPTCHA_LENGTH * VOCAB_LENGTH])
     # h_f2.shape: [batch_size, CAPTCHA_LENGTH * VOCAB_LENGTH]
     h_f2 = tf.nn.relu(tf.matmul(h_d1, w_f2) + b_f2)
-    # h_d2 = tf.nn.dropout(h_f2, keep_prob)
+    h_d2 = tf.nn.dropout(h_f2, keep_prob)
     
-    h_f2_reshape = tf.reshape(h_f2, [-1, VOCAB_LENGTH])
+    h_f2_reshape = tf.reshape(h_d2, [-1, VOCAB_LENGTH])
     y_label_reshape = tf.reshape(y_label, [-1, VOCAB_LENGTH])
     
     # loss
@@ -222,11 +222,11 @@ if __name__ == '__main__':
     parser.add_argument('--time_step', help='time steps', default=32, type=int)
     parser.add_argument('--embedding_size', help='time steps', default=64, type=int)
     parser.add_argument('--category_num', help='category num', default=5, type=int)
-    parser.add_argument('--learning_rate', help='learning rate', default=0.00001, type=float)
+    parser.add_argument('--learning_rate', help='learning rate', default=0.0001, type=float)
     parser.add_argument('--epoch_num', help='num of epoch', default=10000, type=int)
     parser.add_argument('--epochs_per_test', help='epochs per test', default=100, type=int)
     parser.add_argument('--epochs_per_dev', help='epochs per dev', default=2, type=int)
-    parser.add_argument('--epochs_per_save', help='epochs per save', default=2, type=int)
+    parser.add_argument('--epochs_per_save', help='epochs per save', default=100, type=int)
     parser.add_argument('--steps_per_print', help='steps per print', default=2, type=int)
     parser.add_argument('--steps_per_summary', help='steps per summary', default=100, type=int)
     parser.add_argument('--keep_prob', help='train keep prob dropout', default=0.5, type=float)
