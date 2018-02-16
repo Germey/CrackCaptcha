@@ -143,26 +143,25 @@ def main():
     b_f2 = bias([CAPTCHA_LENGTH * VOCAB_LENGTH])
     # h_f2.shape: [batch_size, CAPTCHA_LENGTH * VOCAB_LENGTH]
     h_f2 = tf.nn.relu(tf.matmul(h_d1, w_f2) + b_f2)
-    h_d2 = tf.nn.dropout(h_f2, keep_prob)
+    # h_d2 = tf.nn.dropout(h_f2, keep_prob)
     
-    print('H D2', h_d2)
-    print('H D2', tf.shape(h_d2)[0], tf.shape(h_d2)[1])
-    print('H D2', h_d2.get_shape())
+    h_f2_reshape = tf.reshape(h_f2, [-1, VOCAB_LENGTH])
+    y_label_reshape = tf.reshape(y_label, [-1, VOCAB_LENGTH])
     
     # loss
-    cross_entropy = tf.reduce_sum(tf.nn.softmax_cross_entropy_with_logits(logits=h_d2, labels=y_label))
-    max_index_predict = tf.argmax(tf.reshape(h_d2, [-1, CAPTCHA_LENGTH, VOCAB_LENGTH]), axis=2)
+    cross_entropy = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=h_f2_reshape, labels=y_label_reshape))
+    
+    max_index_predict = tf.argmax(h_f2_reshape, axis=-1)
     print('Max Index Predict', max_index_predict)
-    max_index_label = tf.argmax(tf.reshape(y_label, [-1, CAPTCHA_LENGTH, VOCAB_LENGTH]), axis=2)
+    max_index_label = tf.argmax(y_label_reshape, axis=-1)
     print('Max Index Label', max_index_label)
-
+    
     correct_predict = tf.equal(max_index_predict, max_index_label)
     print('Correct predict', correct_predict)
-    accuracy = tf.reduce_mean(tf.reshape(tf.cast(correct_predict, tf.float32), [-1]))
+    accuracy = tf.reduce_mean(tf.cast(correct_predict, tf.float32))
     
     # Train
-    train = tf.train.AdamOptimizer(FLAGS.learning_rate).minimize(cross_entropy, global_step=global_step)
-    
+    train = tf.train.RMSPropOptimizer(FLAGS.learning_rate).minimize(cross_entropy, global_step=global_step)
     # Saver
     saver = tf.train.Saver()
     
@@ -210,7 +209,7 @@ def main():
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Captcha')
-    parser.add_argument('--train_batch_size', help='train batch size', default=50)
+    parser.add_argument('--train_batch_size', help='train batch size', default=100)
     parser.add_argument('--dev_batch_size', help='dev batch size', default=50)
     parser.add_argument('--test_batch_size', help='test batch size', default=500)
     parser.add_argument('--source_data', help='source size', default='./data/data.pkl')
