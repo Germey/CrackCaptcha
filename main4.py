@@ -255,7 +255,7 @@ if __name__ == '__main__':
     parser.add_argument('--train_batch_size', help='train batch size', default=128)
     parser.add_argument('--dev_batch_size', help='dev batch size', default=256)
     parser.add_argument('--test_batch_size', help='test batch size', default=256)
-    parser.add_argument('--source_data', help='source size', default='./data/data.pkl')
+    parser.add_argument('--source_data', help='source size', default='./data/data2.pkl')
     parser.add_argument('--num_layer', help='num of layer', default=2, type=int)
     parser.add_argument('--num_units', help='num of units', default=64, type=int)
     parser.add_argument('--time_step', help='time steps', default=32, type=int)
