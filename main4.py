@@ -121,56 +121,74 @@ def main():
     
     keep_prob = tf.placeholder(tf.float32, [])
 
-    print('keepprob', keep_prob)
-    # layer1
-    w_conv1 = weight([3, 3, 3, 32])
-    b_conv1 = bias([32])
-    # h_conv1.shape: [-1, 60, 160, 32]
-    h_conv1 = tf.nn.relu(conv2d(x, w_conv1) + b_conv1)
-    print('H Conv1', h_conv1)
-    # h_pool1.shape: [-1, 30, 80, 32]
-    h_pool1 = max_pool(h_conv1)
-    print('H Pool1', h_pool1)
-    h_drop1 = tf.nn.dropout(h_pool1, keep_prob)
-    print('H Drop1', h_drop1)
+    # print('keepprob', keep_prob)
+    # # layer1
+    # w_conv1 = weight([3, 3, 3, 32])
+    # b_conv1 = bias([32])
+    # # h_conv1.shape: [-1, 60, 160, 32]
+    # h_conv1 = tf.nn.relu(conv2d(x, w_conv1) + b_conv1)
+    # print('H Conv1', h_conv1)
+    # # h_pool1.shape: [-1, 30, 80, 32]
+    # h_pool1 = max_pool(h_conv1)
+    # print('H Pool1', h_pool1)
+    # h_drop1 = tf.nn.dropout(h_pool1, keep_prob)
+    # print('H Drop1', h_drop1)
+    #
+    # # layer2
+    # w_conv2 = weight([3, 3, 32, 64])
+    # b_conv2 = bias([64])
+    # # h_conv2.shape: [-1, 30, 80, 64]
+    # h_conv2 = tf.nn.relu(conv2d(h_drop1, w_conv2) + b_conv2)
+    # # h_pool2.shape: [-1, 15, 40, 64]
+    # h_pool2 = max_pool(h_conv2)
+    # h_drop2 = tf.nn.dropout(h_pool2, keep_prob)
+    # print('H Drop2', h_drop2)
+    # # layer3
+    # w_conv3 = weight([3, 3, 64, 64])
+    # b_conv3 = bias([64])
+    # # h_conv3.shape: [-1, 15, 40, 64]
+    # h_conv3 = tf.nn.relu(conv2d(h_drop2, w_conv3) + b_conv3)
+    # # h_pool3.shape: [-1, 8, 20, 64]
+    # h_pool3 = max_pool(h_conv3)
+    # h_drop3 = tf.nn.dropout(h_pool3, keep_prob)
+    # print('H Drop3', h_drop3)
+    #
+    # h_reshape = tf.reshape(h_drop3, [-1, 8 * 20 * 64])
+    # # fully connected layer1
+    # w_f1 = weight([8 * 20 * 64, 1024])
+    # b_f1 = bias([1024])
+    # # h_f1.shape: [batch_size, 1024]
+    # h_d1 = tf.nn.relu(tf.matmul(h_reshape, w_f1) + b_f1)
+    # # h_d1 = tf.nn.dropout(h_f1, keep_prob)
+    #
+    # print('H D1', h_d1)
+    #
+    # # fully connected layer2
+    # w_f2 = weight([1024, CAPTCHA_LENGTH * VOCAB_LENGTH])
+    # b_f2 = bias([CAPTCHA_LENGTH * VOCAB_LENGTH])
+    # # h_f2.shape: [batch_size, CAPTCHA_LENGTH * VOCAB_LENGTH]
+    # h_f2 = tf.nn.relu(tf.matmul(h_d1, w_f2) + b_f2)
+    #
+    # x = h_f2
 
-    # layer2
-    w_conv2 = weight([3, 3, 32, 64])
-    b_conv2 = bias([64])
-    # h_conv2.shape: [-1, 30, 80, 64]
-    h_conv2 = tf.nn.relu(conv2d(h_drop1, w_conv2) + b_conv2)
-    # h_pool2.shape: [-1, 15, 40, 64]
-    h_pool2 = max_pool(h_conv2)
-    h_drop2 = tf.nn.dropout(h_pool2, keep_prob)
-    print('H Drop2', h_drop2)
-    # layer3
-    w_conv3 = weight([3, 3, 64, 64])
-    b_conv3 = bias([64])
-    # h_conv3.shape: [-1, 15, 40, 64]
-    h_conv3 = tf.nn.relu(conv2d(h_drop2, w_conv3) + b_conv3)
-    # h_pool3.shape: [-1, 8, 20, 64]
-    h_pool3 = max_pool(h_conv3)
-    h_drop3 = tf.nn.dropout(h_pool3, keep_prob)
-    print('H Drop3', h_drop3)
+    def conv_layer(x, layer_num, kernel_num, kernel_size):
+        for _ in range(layer_num):
+            x = tf.layers.conv2d(x, kernel_num, kernel_size=kernel_size, padding="same",
+                                 activation=tf.nn.relu,
+                                 kernel_initializer=tf.contrib.layers.xavier_initializer())
+        x = tf.layers.max_pooling2d(x, pool_size=2, strides=2, padding="same")
+        return x
 
-    h_reshape = tf.reshape(h_drop3, [-1, 8 * 20 * 64])
-    # fully connected layer1
-    w_f1 = weight([8 * 20 * 64, 1024])
-    b_f1 = bias([1024])
-    # h_f1.shape: [batch_size, 1024]
-    h_d1 = tf.nn.relu(tf.matmul(h_reshape, w_f1) + b_f1)
-    # h_d1 = tf.nn.dropout(h_f1, keep_prob)
+    x = conv_layer(x, 3, 32, 3)
+    x = conv_layer(x, 3, 64, 3)
+    x = conv_layer(x, 3, 128, 3)
 
-    print('H D1', h_d1)
+    x = tf.layers.flatten(x)
+    x = tf.layers.dense(x, 1024, activation=tf.nn.relu)
 
-    # fully connected layer2
-    w_f2 = weight([1024, CAPTCHA_LENGTH * VOCAB_LENGTH])
-    b_f2 = bias([CAPTCHA_LENGTH * VOCAB_LENGTH])
-    # h_f2.shape: [batch_size, CAPTCHA_LENGTH * VOCAB_LENGTH]
-    h_f2 = tf.nn.relu(tf.matmul(h_d1, w_f2) + b_f2)
-
-    x = h_f2
-    
+    x = tf.layers.dense(x, 1024, activation=tf.nn.relu)
+    # x = tf.layers.dropout(x, rate=keep_prob)
+    x = tf.layers.dense(x, n_classes)
     
     # layer1
     
