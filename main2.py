@@ -155,8 +155,8 @@ def main():
     w_f1 = weight([8 * 20 * 64, 1024])
     b_f1 = bias([1024])
     # h_f1.shape: [batch_size, 1024]
-    h_f1 = tf.nn.relu(tf.matmul(h_reshape, w_f1) + b_f1)
-    h_d1 = tf.nn.dropout(h_f1, keep_prob)
+    h_d1 = tf.nn.relu(tf.matmul(h_reshape, w_f1) + b_f1)
+    # h_d1 = tf.nn.dropout(h_f1, keep_prob)
     
     print('H D1', h_d1)
     
@@ -165,22 +165,36 @@ def main():
     b_f2 = bias([CAPTCHA_LENGTH * VOCAB_LENGTH])
     # h_f2.shape: [batch_size, CAPTCHA_LENGTH * VOCAB_LENGTH]
     h_f2 = tf.nn.relu(tf.matmul(h_d1, w_f2) + b_f2)
+    
+    x = h_f2
     # h_d2 = tf.nn.dropout(h_f2, keep_prob)
     
-    h_f2_reshape = tf.reshape(h_f2, [-1, VOCAB_LENGTH])
-    y_label_reshape = tf.reshape(y_label, [-1, VOCAB_LENGTH])
+    # h_f2_reshape = tf.reshape(h_f2, [-1, VOCAB_LENGTH])
+    # y_label_reshape = tf.reshape(y_label, [-1, VOCAB_LENGTH])
     
     # loss
-    cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=h_f2_reshape, labels=y_label_reshape))
-    
-    max_index_predict = tf.argmax(h_f2_reshape, axis=-1)
+    # cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=h_f2_reshape, labels=y_label_reshape))
+    #
+    # max_index_predict = tf.argmax(h_f2_reshape, axis=-1)
+    # print('Max Index Predict', max_index_predict)
+    # max_index_label = tf.argmax(y_label_reshape, axis=-1)
+    # print('Max Index Label', max_index_label)
+    #
+    # correct_predict = tf.equal(max_index_predict, max_index_label)
+    # print('Correct predict', correct_predict)
+    # accuracy = tf.reduce_mean(tf.cast(correct_predict, tf.float32))
+
+
+    cross_entropy = tf.reduce_sum(tf.nn.softmax_cross_entropy_with_logits(logits=x, labels=y_label))
+    max_index_predict = tf.argmax(tf.reshape(x, [-1, CAPTCHA_LENGTH, VOCAB_LENGTH]), axis=2)
     print('Max Index Predict', max_index_predict)
-    max_index_label = tf.argmax(y_label_reshape, axis=-1)
+    max_index_label = tf.argmax(tf.reshape(y_label, [-1, CAPTCHA_LENGTH, VOCAB_LENGTH]), axis=2)
     print('Max Index Label', max_index_label)
-    
+
     correct_predict = tf.equal(max_index_predict, max_index_label)
     print('Correct predict', correct_predict)
-    accuracy = tf.reduce_mean(tf.cast(correct_predict, tf.float32))
+    accuracy = tf.reduce_mean(tf.reshape(tf.cast(correct_predict, tf.float32), [-1]))
+    
     
     # Train
     # train = tf.train.AdamOptimizer(FLAGS.learning_rate).minimize(cross_entropy, global_step=global_step)
@@ -236,13 +250,13 @@ if __name__ == '__main__':
     parser.add_argument('--train_batch_size', help='train batch size', default=200)
     parser.add_argument('--dev_batch_size', help='dev batch size', default=50)
     parser.add_argument('--test_batch_size', help='test batch size', default=500)
-    parser.add_argument('--source_data', help='source size', default='./data/data.pkl')
+    parser.add_argument('--source_data', help='source size', default='./data/data2.pkl')
     parser.add_argument('--num_layer', help='num of layer', default=2, type=int)
     parser.add_argument('--num_units', help='num of units', default=64, type=int)
     parser.add_argument('--time_step', help='time steps', default=32, type=int)
     parser.add_argument('--embedding_size', help='time steps', default=64, type=int)
     parser.add_argument('--category_num', help='category num', default=5, type=int)
-    parser.add_argument('--learning_rate', help='learning rate', default=0.00001, type=float)
+    parser.add_argument('--learning_rate', help='learning rate', default=0.0001, type=float)
     parser.add_argument('--epoch_num', help='num of epoch', default=10000, type=int)
     parser.add_argument('--epochs_per_test', help='epochs per test', default=100, type=int)
     parser.add_argument('--epochs_per_dev', help='epochs per dev', default=2, type=int)

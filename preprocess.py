@@ -74,9 +74,16 @@ def generate_data():
     # write data to pickle
     if not exists(DATA_PATH):
         makedirs(DATA_PATH)
-    with open(join(DATA_PATH, 'data.pkl'), 'wb') as f:
-        pickle.dump(np.asarray(data_x, np.float32), f)
-        pickle.dump(np.asarray(data_y, np.float32), f)
+
+    x = np.asarray(data_x, np.float32)
+    y = np.asarray(data_y, np.float32) / CAPTCHA_LENGTH
+    with open(join(DATA_PATH, 'data2.pkl'), 'wb') as f:
+        pickle.dump(x, f)
+        pickle.dump(y, f)
+        
+    # with open(join(DATA_PATH, 'data.pkl'), 'wb') as f:
+    #     pickle.dump(np.asarray(data_x, np.float32), f)
+    #     pickle.dump(np.asarray(data_y, np.float32), f)
 
 
 if __name__ == '__main__':
