@@ -49,6 +49,10 @@ def zeros(shape):
     return tf.Variable(tf.zeros(shape, tf.float32))
 
 
+def random(shape):
+    return tf.Variable(tf.random_normal(shape, tf.float32))
+
+
 def train(loss, global_step):
     MOVING_AVERAGE_DECAY = 0.9999  # The decay to use for the moving average.
     
@@ -172,9 +176,7 @@ def main():
     x = tf.layers.flatten(x)
     x = tf.layers.dense(x, 1024, activation=tf.nn.relu)
     
-    
     x = tf.layers.dense(x, 1024, activation=tf.nn.relu)
-    
     x = tf.layers.dense(x, n_classes)
     
     # x = tf.nn.dropout(h_f1, keep_prob)
