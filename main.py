@@ -33,8 +33,6 @@ def get_data(data_x, data_y):
     :return: Arrays
     """
     print('Data X Length', len(data_x), 'Data Y Length', len(data_y))
-    print('Data X Example', data_x[0])
-    print('Data Y Example', data_y[0])
     
     train_x, test_x, train_y, test_y = train_test_split(data_x, data_y, test_size=0.4, random_state=40)
     dev_x, test_x, dev_y, test_y, = train_test_split(test_x, test_y, test_size=0.5, random_state=40)
@@ -64,8 +62,6 @@ def main():
     
     test_dataset = tf.data.Dataset.from_tensor_slices((test_x, test_y))
     test_dataset = test_dataset.batch(FLAGS.test_batch_size)
-    
-    print(train_dataset.output_types, test_dataset.output_shapes)
     
     # a reinitializable iterator
     iterator = tf.data.Iterator.from_structure(train_dataset.output_types, train_dataset.output_shapes)
@@ -150,14 +146,16 @@ def main():
     else:
         # Load model
         ckpt = tf.train.get_checkpoint_state('ckpt')
-        saver.restore(sess, ckpt.model_checkpoint_path)
-        print('Restore from', ckpt.model_checkpoint_path)
-        sess.run(test_initializer)
-        for step in range(int(test_steps)):
-            if step % FLAGS.steps_per_print == 0:
-                print('Test Accuracy', sess.run(accuracy, feed_dict={keep_prob: 1}), 'Step', step)
-        
-        
+        if ckpt:
+            saver.restore(sess, ckpt.model_checkpoint_path)
+            print('Restore from', ckpt.model_checkpoint_path)
+            sess.run(test_initializer)
+            for step in range(int(test_steps)):
+                if step % FLAGS.steps_per_print == 0:
+                    print('Test Accuracy', sess.run(accuracy, feed_dict={keep_prob: 1}), 'Step', step)
+        else:
+            print('No Model Found')
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Captcha')
@@ -175,13 +173,13 @@ if __name__ == '__main__':
     parser.add_argument('--epochs_per_test', help='epochs per test', default=100, type=int)
     parser.add_argument('--epochs_per_dev', help='epochs per dev', default=2, type=int)
     parser.add_argument('--epochs_per_save', help='epochs per save', default=10, type=int)
-    parser.add_argument('--steps_per_print', help='steps per print', default=4, type=int)
+    parser.add_argument('--steps_per_print', help='steps per print', default=2, type=int)
     parser.add_argument('--steps_per_summary', help='steps per summary', default=100, type=int)
     parser.add_argument('--keep_prob', help='train keep prob dropout', default=0.5, type=float)
     parser.add_argument('--checkpoint_dir', help='checkpoint dir', default='ckpt/model.ckpt', type=str)
     parser.add_argument('--summaries_dir', help='summaries dir', default='summaries/', type=str)
-    parser.add_argument('--train', help='train', default=True, type=bool)
+    parser.add_argument('--train', help='train', default=1, type=int)
     
     FLAGS, args = parser.parse_known_args()
-    
+    print(FLAGS)
     main()
