@@ -79,7 +79,7 @@ def generate_data():
     
     x = np.asarray(data_x, np.float32)
     y = np.asarray(data_y, np.float32)
-    with open(join(DATA_PATH, 'data2.pkl'), 'wb') as f:
+    with open(join(DATA_PATH, 'data.pkl'), 'wb') as f:
         pickle.dump(x, f)
         pickle.dump(y, f)
 
