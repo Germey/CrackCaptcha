@@ -169,7 +169,9 @@ def main():
     # h_f1.shape: [batch_size, 1024]
     h_f1 = tf.nn.relu(tf.matmul(h_reshape, w_f1) + b_f1)
     
-    x = tf.layers.dense(h_f1, n_classes)
+    x = tf.layers.dense(h_f1, 1024, activation=tf.nn.relu)
+
+    x = tf.layers.dense(x, n_classes)
     
     # x = tf.nn.dropout(h_f1, keep_prob)
     #
