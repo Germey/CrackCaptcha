@@ -159,7 +159,7 @@ def main():
     h_pool3 = max_pool(h_conv3)
     h_drop3 = tf.nn.dropout(h_pool3, keep_prob)
     print('H Drop3', h_drop3)
-    
+    x = h_drop3
     # x = tf.layers.flatten(h_drop3)
     # print('X Flatten', x.shape)
     # x = tf.layers.dense(x, 1024, activation=tf.nn.relu)
@@ -168,7 +168,7 @@ def main():
     # x = tf.layers.dropout(x, rate=keep_prob)
     # x = tf.layers.dense(x, n_classes)
     
-    # h_reshape = tf.reshape(h_drop3, [-1, 8 * 20 * 64])
+    # x = tf.reshape(h_drop3, [-1, 8 * 20 * 64])
     # w_f1 = zeros([8 * 20 * 64, 1024])
     # b_f1 = zeros([1024])
     # h_f1 = tf.nn.relu(tf.add(tf.matmul(h_reshape, w_f1), b_f1))
