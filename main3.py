@@ -88,7 +88,7 @@ def main():
     for _ in range(3):
         y = tf.layers.conv2d(y, filters=32, kernel_size=3, padding='same', activation=tf.nn.relu)
         y = tf.layers.max_pooling2d(y, pool_size=2, strides=2, padding='same')
-        # y = tf.layers.dropout(y, rate=keep_prob)
+        y = tf.layers.dropout(y, rate=keep_prob)
     
     # 2 dense layers
     y = tf.layers.flatten(y)
