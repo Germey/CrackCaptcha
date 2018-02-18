@@ -11,8 +11,9 @@ from sklearn.model_selection import train_test_split
 FLAGS = None
 
 
-def standardize(X):
-    return (X - X.mean()) / X.std()
+#
+# def standardize(X):
+#     return (X - X.mean()) / X.std()
 
 
 def load_data():
@@ -23,26 +24,7 @@ def load_data():
     with open(join(FLAGS.source_data), 'rb') as f:
         data_x = pickle.load(f)
         data_y = pickle.load(f)
-        
-        return standardize(data_x), data_y
-
-
-def train(loss, global_step):
-    MOVING_AVERAGE_DECAY = 0.9999  # The decay to use for the moving average.
-    
-    opt = tf.train.RMSPropOptimizer(0.0001)
-    grads = opt.compute_gradients(loss)
-    
-    apply_gradient_op = opt.apply_gradients(grads, global_step=global_step)
-    
-    # Track the moving averages of all trainable variables.
-    variable_averages = tf.train.ExponentialMovingAverage(
-        MOVING_AVERAGE_DECAY, global_step)
-    variables_averages_op = variable_averages.apply(tf.trainable_variables())
-    
-    with tf.control_dependencies([apply_gradient_op, variables_averages_op]):
-        train_op = tf.no_op(name='train')
-    return train_op
+        return data_x, data_y
 
 
 def get_data(data_x, data_y):
@@ -98,77 +80,69 @@ def main():
     with tf.variable_scope('inputs'):
         # x.shape = [-1, 60, 160, 3]
         x, y_label = iterator.get_next()
-    print(x.shape)
     
     keep_prob = tf.placeholder(tf.float32, [])
     
-    # layer1
+    y = tf.cast(x, tf.float32)
     
-    def conv_layer(x, layer_num, kernel_num, kernel_size):
-        for _ in range(layer_num):
-            x = tf.layers.conv2d(x, kernel_num, kernel_size=kernel_size, padding="same",
-                                 activation=tf.nn.relu,
-                                 kernel_initializer=tf.contrib.layers.xavier_initializer())
-        x = tf.layers.max_pooling2d(x, pool_size=2, strides=2, padding="same")
-        return x
+    # 3 CNN layers
+    for _ in range(3):
+        y = tf.layers.conv2d(y, filters=32, kernel_size=3, padding='same', activation=tf.nn.relu)
+        y = tf.layers.max_pooling2d(y, pool_size=2, strides=2, padding='same')
+        y = tf.layers.dropout(y, rate=keep_prob)
     
-    x = conv_layer(x, 3, 32, 3)
-    x = conv_layer(x, 3, 64, 3)
-    x = conv_layer(x, 3, 128, 3)
-    
-    x = tf.layers.flatten(x)
-    x = tf.layers.dense(x, 1024, activation=tf.nn.relu)
-    
-    x = tf.layers.dense(x, 1024, activation=tf.nn.relu)
-    # x = tf.layers.dropout(x, rate=keep_prob)
-    x = tf.layers.dense(x, n_classes)
+    # 2 dense layers
+    y = tf.layers.flatten(y)
+    y = tf.layers.dense(y, 1024, activation=tf.nn.relu)
+    y = tf.layers.dropout(y, rate=keep_prob)
+    y = tf.layers.dense(y, n_classes)
     
     # loss
-    cross_entropy = tf.reduce_sum(tf.nn.softmax_cross_entropy_with_logits(logits=x, labels=y_label))
-    max_index_predict = tf.argmax(tf.reshape(x, [-1, CAPTCHA_LENGTH, VOCAB_LENGTH]), axis=2)
-    print('Max Index Predict', max_index_predict)
-    max_index_label = tf.argmax(tf.reshape(y_label, [-1, CAPTCHA_LENGTH, VOCAB_LENGTH]), axis=2)
-    print('Max Index Label', max_index_label)
+    cross_entropy = tf.reduce_sum(tf.nn.softmax_cross_entropy_with_logits(logits=y, labels=y_label))
     
+    # accuracy
+    max_index_predict = tf.argmax(tf.reshape(y, [-1, VOCAB_LENGTH]), axis=-1)
+    max_index_label = tf.argmax(tf.reshape(y_label, [-1, VOCAB_LENGTH]), axis=-1)
     correct_predict = tf.equal(max_index_predict, max_index_label)
-    print('Correct predict', correct_predict)
-    accuracy = tf.reduce_mean(tf.reshape(tf.cast(correct_predict, tf.float32), [-1]))
+    accuracy = tf.reduce_mean(tf.cast(correct_predict, tf.float32))
     
-    # Train
-    train_op = tf.train.RMSPropOptimizer(0.0001).minimize(cross_entropy, global_step=global_step)
-    # train_op = train(cross_entropy, global_step)
+    # train
+    train_op = tf.train.AdamOptimizer(FLAGS.learning_rate).minimize(cross_entropy, global_step=global_step)
     
-    # Saver
+    # saver
     saver = tf.train.Saver()
     
-    # Iterator
+    # iterator
     sess = tf.Session()
     sess.run(tf.global_variables_initializer())
     
-    # Global step
+    # global step
     gstep = 0
     
+    # checkpoint dir
+    if not exists(FLAGS.checkpoint_dir):
+        makedirs(FLAGS.checkpoint_dir)
+    
     if FLAGS.train:
-        
         for epoch in range(FLAGS.epoch_num):
             tf.train.global_step(sess, global_step_tensor=global_step)
-            # Train
+            # train
             sess.run(train_initializer)
             for step in range(int(train_steps)):
                 loss, acc, gstep, _ = sess.run([cross_entropy, accuracy, global_step, train_op],
                                                feed_dict={keep_prob: FLAGS.keep_prob})
-                # Print log
+                # print log
                 if step % FLAGS.steps_per_print == 0:
                     print('Global Step', gstep, 'Step', step, 'Train Loss', loss, 'Accuracy', acc)
             
             if epoch % FLAGS.epochs_per_dev == 0:
-                # Dev
+                # dev
                 sess.run(dev_initializer)
                 for step in range(int(dev_steps)):
                     if step % FLAGS.steps_per_print == 0:
                         print('Dev Accuracy', sess.run(accuracy, feed_dict={keep_prob: 1}), 'Step', step)
             
-            # Save model
+            # save model
             if epoch % FLAGS.epochs_per_save == 0:
                 saver.save(sess, FLAGS.checkpoint_dir, global_step=gstep)
     
