@@ -172,7 +172,7 @@ def main():
     # x = tf.layers.flatten(x)
     # tf.get_variable()
     
-    w_f1 = tf.get_variable(shape=[8 * 20 * 64, 1024])
+    w_f1 = tf.get_variable(name='w_f1', shape=[8 * 20 * 64, 1024])
     b_f1 = zeros([1024])
     x = tf.nn.relu(tf.add(tf.matmul(x, w_f1), b_f1))
 
