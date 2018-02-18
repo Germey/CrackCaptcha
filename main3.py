@@ -109,7 +109,7 @@ def main():
     accuracy = tf.reduce_mean(tf.cast(correct_predict, tf.float32))
     
     # train
-    train_op = tf.train.AdamOptimizer(FLAGS.learning_rate).minimize(cross_entropy, global_step=global_step)
+    train_op = tf.train.RMSPropOptimizer(FLAGS.learning_rate).minimize(cross_entropy, global_step=global_step)
     
     # saver
     saver = tf.train.Saver()
