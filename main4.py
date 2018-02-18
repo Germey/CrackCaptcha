@@ -50,7 +50,7 @@ def zeros(shape):
 
 
 def random(shape):
-    return tf.Variable(tf.random_normal(shape, tf.float32))
+    return tf.Variable(tf.random_normal(shape, dtype=tf.float32))
 
 
 def train(loss, global_step):
