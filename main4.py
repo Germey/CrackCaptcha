@@ -176,7 +176,7 @@ def main():
     b_f1 = zeros([1024])
     x = tf.nn.relu(tf.add(tf.matmul(x, w_f1), b_f1))
 
-    x = tf.layers.dense(x, 1024, activation=tf.nn.relu)
+    # x = tf.layers.dense(x, 1024, activation=tf.nn.relu)
     
     x = tf.layers.dense(x, 1024, activation=tf.nn.relu)
     x = tf.layers.dense(x, n_classes)
