@@ -164,14 +164,16 @@ def main():
     # x = tf.layers.dropout(x, rate=keep_prob)
     # x = tf.layers.dense(x, n_classes)
     
-    h_reshape = tf.reshape(h_drop3, [-1, 8 * 20 * 64])
-    # # fully connected layer1
-    w_f1 = zeros([8 * 20 * 64, 1024])
-    b_f1 = zeros([1024])
-    # h_f1.shape: [batch_size, 1024]
-    h_f1 = tf.nn.relu(tf.add(tf.matmul(h_reshape, w_f1), b_f1))
+    # h_reshape = tf.reshape(h_drop3, [-1, 8 * 20 * 64])
+    # w_f1 = zeros([8 * 20 * 64, 1024])
+    # b_f1 = zeros([1024])
+    # h_f1 = tf.nn.relu(tf.add(tf.matmul(h_reshape, w_f1), b_f1))
+
+    x = tf.layers.flatten(x)
+    x = tf.layers.dense(x, 1024, activation=tf.nn.relu)
     
-    x = tf.layers.dense(h_f1, 1024, activation=tf.nn.relu)
+    
+    x = tf.layers.dense(x, 1024, activation=tf.nn.relu)
     
     x = tf.layers.dense(x, n_classes)
     
