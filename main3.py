@@ -97,12 +97,15 @@ def main():
     y = tf.layers.dropout(y, rate=keep_prob)
     y = tf.layers.dense(y, n_classes)
     
+    y_reshape = tf.reshape(y, [-1, VOCAB_LENGTH])
+    y_label_reshape = tf.reshape(y_label, [-1, VOCAB_LENGTH])
+    
     # loss
-    cross_entropy = tf.reduce_sum(tf.nn.softmax_cross_entropy_with_logits(logits=y, labels=y_label))
+    cross_entropy = tf.reduce_sum(tf.nn.softmax_cross_entropy_with_logits(logits=y_reshape, labels=y_label_reshape))
     
     # accuracy
-    max_index_predict = tf.argmax(tf.reshape(y, [-1, VOCAB_LENGTH]), axis=-1)
-    max_index_label = tf.argmax(tf.reshape(y_label, [-1, VOCAB_LENGTH]), axis=-1)
+    max_index_predict = tf.argmax(y_reshape, axis=-1)
+    max_index_label = tf.argmax(y_label_reshape, axis=-1)
     correct_predict = tf.equal(max_index_predict, max_index_label)
     accuracy = tf.reduce_mean(tf.cast(correct_predict, tf.float32))
     
@@ -159,7 +162,7 @@ if __name__ == '__main__':
     parser.add_argument('--train_batch_size', help='train batch size', default=128)
     parser.add_argument('--dev_batch_size', help='dev batch size', default=256)
     parser.add_argument('--test_batch_size', help='test batch size', default=256)
-    parser.add_argument('--source_data', help='source size', default='./data/data2.pkl')
+    parser.add_argument('--source_data', help='source size', default='./data/data.pkl')
     parser.add_argument('--num_layer', help='num of layer', default=2, type=int)
     parser.add_argument('--num_units', help='num of units', default=64, type=int)
     parser.add_argument('--time_step', help='time steps', default=32, type=int)
