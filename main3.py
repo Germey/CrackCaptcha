@@ -11,9 +11,8 @@ from sklearn.model_selection import train_test_split
 FLAGS = None
 
 
-#
-# def standardize(X):
-#     return (X - X.mean()) / X.std()
+def standardize(x):
+    return (x - x.mean()) / x.std()
 
 
 def load_data():
@@ -24,7 +23,7 @@ def load_data():
     with open(join(FLAGS.source_data), 'rb') as f:
         data_x = pickle.load(f)
         data_y = pickle.load(f)
-        return data_x, data_y
+        return standardize(data_x), data_y
 
 
 def get_data(data_x, data_y):
@@ -89,7 +88,7 @@ def main():
     for _ in range(3):
         y = tf.layers.conv2d(y, filters=32, kernel_size=3, padding='same', activation=tf.nn.relu)
         y = tf.layers.max_pooling2d(y, pool_size=2, strides=2, padding='same')
-        y = tf.layers.dropout(y, rate=keep_prob)
+        # y = tf.layers.dropout(y, rate=keep_prob)
     
     # 2 dense layers
     y = tf.layers.flatten(y)

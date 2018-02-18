@@ -62,6 +62,7 @@ def get_random_text():
 def generate_data():
     print('Generating Data...')
     data_x, data_y = [], []
+    
     # generate data x and y
     for i in range(DATA_LENGTH):
         text = get_random_text()
@@ -71,19 +72,16 @@ def generate_data():
         vector = text2vec(text)
         data_x.append(captcha_array)
         data_y.append(vector)
+        
     # write data to pickle
     if not exists(DATA_PATH):
         makedirs(DATA_PATH)
-
+    
     x = np.asarray(data_x, np.float32)
-    y = np.asarray(data_y, np.float32) / CAPTCHA_LENGTH
+    y = np.asarray(data_y, np.float32)
     with open(join(DATA_PATH, 'data2.pkl'), 'wb') as f:
         pickle.dump(x, f)
         pickle.dump(y, f)
-        
-    # with open(join(DATA_PATH, 'data.pkl'), 'wb') as f:
-    #     pickle.dump(np.asarray(data_x, np.float32), f)
-    #     pickle.dump(np.asarray(data_y, np.float32), f)
 
 
 if __name__ == '__main__':
