@@ -33,7 +33,8 @@ def get_data(data_x, data_y):
     :return: Arrays
     """
     print('Data X Length', len(data_x), 'Data Y Length', len(data_y))
-    
+    print('Data X Example', data_x[0])
+    print('Data Y Example', data_y[0])
     train_x, test_x, train_y, test_y = train_test_split(data_x, data_y, test_size=0.4, random_state=40)
     dev_x, test_x, dev_y, test_y, = train_test_split(test_x, test_y, test_size=0.5, random_state=40)
     
@@ -83,7 +84,7 @@ def main():
     for _ in range(3):
         y = tf.layers.conv2d(y, filters=32, kernel_size=3, padding='same', activation=tf.nn.relu)
         y = tf.layers.max_pooling2d(y, pool_size=2, strides=2, padding='same')
-        y = tf.layers.dropout(y, rate=keep_prob)
+        # y = tf.layers.dropout(y, rate=keep_prob)
     
     # 2 dense layers
     y = tf.layers.flatten(y)
@@ -181,5 +182,4 @@ if __name__ == '__main__':
     parser.add_argument('--train', help='train', default=1, type=int)
     
     FLAGS, args = parser.parse_known_args()
-    print(FLAGS)
     main()
