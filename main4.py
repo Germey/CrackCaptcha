@@ -27,7 +27,6 @@ def load_data():
         return standardize(data_x), data_y
 
 
-
 def weight(shape, stddev=0.1, mean=0):
     initial = tf.truncated_normal(shape=shape, mean=mean, stddev=stddev)
     return tf.Variable(initial)
@@ -45,6 +44,8 @@ def conv2d(input, filter, strides=[1, 1, 1, 1], padding='SAME'):
 def max_pool(input, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME'):
     return tf.nn.max_pool(input, ksize=ksize, strides=strides, padding=padding)
 
+def zeros(shape):
+    return tf.Variable(tf.zeros(shape, tf.float32))
 
 def train(loss, global_step):
     MOVING_AVERAGE_DECAY = 0.9999  # The decay to use for the moving average.
@@ -120,7 +121,7 @@ def main():
     print(x.shape)
     
     keep_prob = tf.placeholder(tf.float32, [])
-
+    
     print('keepprob', keep_prob)
     # layer1
     w_conv1 = weight([3, 3, 3, 32])
@@ -133,7 +134,7 @@ def main():
     print('H Pool1', h_pool1)
     h_drop1 = tf.nn.dropout(h_pool1, keep_prob)
     print('H Drop1', h_drop1)
-
+    
     # layer2
     w_conv2 = weight([3, 3, 32, 64])
     b_conv2 = bias([64])
@@ -152,21 +153,25 @@ def main():
     h_pool3 = max_pool(h_conv3)
     h_drop3 = tf.nn.dropout(h_pool3, keep_prob)
     print('H Drop3', h_drop3)
-
-    x = tf.layers.flatten(h_drop3)
-    x = tf.layers.dense(x, 1024, activation=tf.nn.relu)
-
-    x = tf.layers.dense(x, 1024, activation=tf.nn.relu)
-    # x = tf.layers.dropout(x, rate=keep_prob)
-    x = tf.layers.dense(x, n_classes)
     
-    # h_reshape = tf.reshape(h_drop3, [-1, 8 * 20 * 64])
+    # x = tf.layers.flatten(h_drop3)
+    # print('X Flatten', x.shape)
+    # x = tf.layers.dense(x, 1024, activation=tf.nn.relu)
+    
+    # x = tf.layers.dense(x, 1024, activation=tf.nn.relu)
+    # x = tf.layers.dropout(x, rate=keep_prob)
+    # x = tf.layers.dense(x, n_classes)
+    
+    h_reshape = tf.reshape(h_drop3, [-1, 8 * 20 * 64])
     # # fully connected layer1
-    # w_f1 = weight([8 * 20 * 64, 1024])
-    # b_f1 = bias([1024])
-    # # h_f1.shape: [batch_size, 1024]
-    # h_d1 = tf.nn.relu(tf.matmul(h_reshape, w_f1) + b_f1)
-    # # h_d1 = tf.nn.dropout(h_f1, keep_prob)
+    w_f1 = zeros([8 * 20 * 64, 1024])
+    b_f1 = zeros([1024])
+    # h_f1.shape: [batch_size, 1024]
+    h_f1 = tf.nn.relu(tf.matmul(h_reshape, w_f1) + b_f1)
+    
+    x = tf.layers.dense(h_f1, n_classes)
+    
+    # x = tf.nn.dropout(h_f1, keep_prob)
     #
     # print('H D1', h_d1)
     #
@@ -175,9 +180,9 @@ def main():
     # b_f2 = bias([CAPTCHA_LENGTH * VOCAB_LENGTH])
     # # h_f2.shape: [batch_size, CAPTCHA_LENGTH * VOCAB_LENGTH]
     # h_f2 = tf.nn.relu(tf.matmul(h_d1, w_f2) + b_f2)
-
+    
     # x = h_f2
-
+    
     # def conv_layer(x, layer_num, kernel_num, kernel_size):
     #     for _ in range(layer_num):
     #         x = tf.layers.conv2d(x, kernel_num, kernel_size=kernel_size, padding="same",
@@ -195,7 +200,6 @@ def main():
     #
     # x = tf.layers.dense(x, 1024, activation=tf.nn.relu)
     # # x = tf.layers.dropout(x, rate=keep_prob)
-    # x = tf.layers.dense(x, n_classes)
     
     # layer1
     
