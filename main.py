@@ -46,7 +46,6 @@ def get_data(data_x, data_y):
 
 def main():
     data_x, data_y = load_data()
-    n_classes = data_y.shape[-1]
     train_x, train_y, dev_x, dev_y, test_x, test_y = get_data(data_x, data_y)
     train_steps = math.ceil(train_x.shape[0] / FLAGS.train_batch_size)
     dev_steps = math.ceil(dev_x.shape[0] / FLAGS.dev_batch_size)
@@ -90,7 +89,7 @@ def main():
     y = tf.layers.flatten(y)
     y = tf.layers.dense(y, 1024, activation=tf.nn.relu)
     y = tf.layers.dropout(y, rate=keep_prob)
-    y = tf.layers.dense(y, n_classes)
+    y = tf.layers.dense(y, VOCAB_LENGTH)
     
     y_reshape = tf.reshape(y, [-1, VOCAB_LENGTH])
     y_label_reshape = tf.reshape(y_label, [-1, VOCAB_LENGTH])
@@ -145,7 +144,7 @@ def main():
                 saver.save(sess, FLAGS.checkpoint_dir, global_step=gstep)
     
     else:
-        # Load model
+        # load model
         ckpt = tf.train.get_checkpoint_state('ckpt')
         if ckpt:
             saver.restore(sess, ckpt.model_checkpoint_path)

@@ -72,7 +72,7 @@ def generate_data():
         vector = text2vec(text)
         data_x.append(captcha_array)
         data_y.append(vector)
-        
+    
     # write data to pickle
     if not exists(DATA_PATH):
         makedirs(DATA_PATH)
@@ -85,4 +85,8 @@ def generate_data():
 
 
 if __name__ == '__main__':
-    generate_data()
+    vector = text2vec('1234')
+    text = vec2text(vector)
+    print(vector, text)
+
+    
